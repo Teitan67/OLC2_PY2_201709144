@@ -1,0 +1,39 @@
+tr{
+	background: #fff;
+	text-align: center;
+	transition: 0.1s;
+}
+tr,td{
+	border:1px black solid;
+	padding: 15px;
+	margin: 0px;
+}
+tr:hover{
+	transition: 0.1s;
+	padding: 20px;
+	background: yellow;
+}
+tr#Cabeza,tr#Cabeza-mb{
+	color: #fff;
+	background: #000;
+}
+h2,h4{
+	color: #fff;
+	position: relative;
+}
+#tabla-errores{
+    position: absolute;
+    top:650px;
+    left: 40px;
+}
+#Ast{
+    position: absolute;
+    top:650px;
+    left: 830px;
+}
+.btnReportes{
+	border: none;
+}
+
+
+
