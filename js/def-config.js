@@ -40,6 +40,7 @@ let tsGlobal;
 //Funciones del compilador
 function analizar() {
   tsGlobal = new TS([]);
+  ambito=ambGlobal;
   funcionesTabla = [];
   limpiar();
   texto = editor.getValue();
@@ -62,10 +63,10 @@ function limpiarAmb(){
 
 let noVariables=0;
 
-function addVariable(nombre, tipo, ambito) {
+function addVariable(nombre, tipo, ambito,fila,columna) {
   ++noVariables;
   var tabla = document.getElementById("tabla-amb");
-  tabla.insertAdjacentHTML("beforeend", "<tr id='Cuerpop'><td>" + noVariables + "</td><td>" + nombre + "</td><td>" + tipo + "</td><td>" + ambito + "</td></tr>");
+  tabla.insertAdjacentHTML("beforeend", "<tr id='Cuerpop'><td>" + noVariables + "</td><td>" + nombre + "</td><td>" + tipo + "</td><td>" + ambito+"</td><td>" + fila + "</td><td>" + columna+"</td></tr>");
 
 }
 

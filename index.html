@@ -26,6 +26,7 @@
     <div class="btn-group" role="group" aria-label="Button group with nested dropdown" id="menu">
         <button type="button" class="btn btn-secondary" onclick="analizar()">Ejecutar <i class="fas fa-play"></i></button>
         <button type="button" class="btn btn-secondary">Traducir <i class="fas fa-file-code"></i></button>
+        <button type="button" class="btn btn-secondary">Optimizar </button>
         <div class="btn-group" role="group">
             <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
@@ -50,10 +51,13 @@
                 <td> Nombre </td>
                 <td> Tipo </td>
                 <td> Ambito</td>
+                <td> Fila </td>
+                <td> Columna</td>
             </tr>
         </table>
     </div>
     <textarea id="consol" rows="7" cols="180" disabled="false">Esperando comandos...</textarea>
+    <textarea id="traduccion"  rows="10" cols="180" disabled="false">Esperando codigo tres direcciones...</textarea>
     <div id="tabla-errores">	
 			<h2 id="Titulo">Errores:</h2>
 			<table id ="tabla">
@@ -61,8 +65,8 @@
 					<td> No.</td>
 					<td> Tipo error </td>
 					<td> Descripcion</td>
-					<td> Columna</td>
-					<td> Fila </td>
+					<td> Fila</td>
+					<td> Columna </td>
                 </tr>
                 
 			</table>

@@ -13,13 +13,15 @@ const TIPO_DATO = {
 }
 
 
-function crearSimbolo(acceso,id, tipo, valor) {
+function crearSimbolo(acceso,id, tipo, valor,fila,columna) {
     return {
         acceso:acceso,
         id: id,
         tipo: tipo,
         valor: valor,
-        ambito:ambito
+        ambito:ambito,
+        fila:fila,
+        columna:columna
     }
 }
 
@@ -30,8 +32,8 @@ class TS {
         this._simbolos = simbolos;
     }
 
-    agregar(acceso,id, tipo, valor) {
-        const nuevoSimbolo = crearSimbolo(acceso,id, tipo, valor);
+    agregar(acceso,id, tipo, valor,fila,columna) {
+        const nuevoSimbolo = crearSimbolo(acceso,id, tipo, valor,fila,columna);
         this._simbolos.push(nuevoSimbolo);
     }
 
@@ -119,8 +121,8 @@ const TIPO_FUNCION = {
  let funcionesTabla = [];
 
  function obtenerFuncion(id){
-    
-    for (const funcion of funcionesTabla) {
+    let funcion_tab = funcionesTabla;
+    for (const funcion of funcion_tab) {
 
         if(funcion.identificador==id){
             return funcion

@@ -65,7 +65,7 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
     });
 }
 function procesarFuncion(instruccion,tablaDeSimbolos){
-    //console.log(funcionesTabla);
+    
     let funcion=obtenerFuncion(instruccion.identificador);
     
     if(funcion!==null){
@@ -75,22 +75,24 @@ function procesarFuncion(instruccion,tablaDeSimbolos){
         let parametros_funcion=funcion.parametros;
         let variables_locales=[];
         let auxVarianle=null;
+        console.log(parametros_entrada);
+        console.log("entrada: ",parametros_entrada,"\nfuncion:",parametros_funcion);
         if (parametros_entrada.length==parametros_funcion.length){
-            for (const i in parametros_entrada) {
+            for (let i in parametros_entrada) {
                 auxVarianle=parametros_funcion[i];
-                console.log(parametros_entrada[i]);
-                variables_locales.unshift(instruccionesAST.crearVariable(auxVarianle.identificador,auxVarianle.tipo_Var,parametros_entrada[i]));
+               // console.log(parametros_entrada[i]);
+                variables_locales.unshift(instruccionesAST.crearVariable(auxVarianle.identificador,auxVarianle.tipo_Var,parametros_entrada[i],funcion.fila,funcion.columna));
             }
             let ast_parametro=instruccionesAST.nuevaVariable("let",variables_locales);
             procesarCreacionVariable(ast_parametro, tablaDeSimbolos);
             procesarBloque(funcion.sentencias,tablaDeSimbolos);
-            finAmbito(auxAmbito,ambito,tablaDeSimbolos);  
+            
         }else{
-            reportarError("Semantico", "La siguiente funcion "+instruccion.identificador+"<br> tiene un numero de parametros invalidos" , 0, 0); 
+            reportarError("Semantico", "La siguiente funcion "+instruccion.identificador+"<br> tiene un numero de parametros invalidos" , instruccion.fila, instruccion.columna); 
         }
- 
+        finAmbito(auxAmbito,ambito,tablaDeSimbolos); 
     }else{
-        reportarError("Semantico", "La siguiente funcion "+instruccion.identificador+"<br> no existe" , 0, 0); 
+        reportarError("Semantico", "La siguiente funcion "+instruccion.identificador+"<br> no existe" , instruccion.fila, instruccion.columna); 
     }
 }
 
@@ -99,7 +101,7 @@ function procesarCreacionVariable(instruccion, tablaDeSimbolos) {
 
     for (let variable of instruccion.variables) {
         if (tablaDeSimbolos.verificarInsertarAsig(variable.identificador,ambito)) {
-            if (puedoInsertar(variable.valor, variable.tipo_var,tablaDeSimbolos)) {
+            if (puedoInsertar(variable.valor, variable.tipo_var,tablaDeSimbolos, variable.fila,variable.columna)) {
                 if (variable.tipo === TIPO_OPERACION.CREAR_VAR) {
                     let val = null;
                     let tipo_var = variable.tipo_var;
@@ -107,15 +109,20 @@ function procesarCreacionVariable(instruccion, tablaDeSimbolos) {
                         tipo_var = tipoDato(variable.valor,tablaDeSimbolos);
                         val = procesarExpresionCadena(variable.valor, tablaDeSimbolos);
                     }
-                    tablaDeSimbolos.agregar(acceso, variable.identificador, tipo_var, val);
+                    if (variable.valor==null&&acceso=="const") {
+                        reportarError("Semantico", "La variable es una constante y<br> debe asignarse un dato ",  variable.fila,variable.columna); 
+                    }else{
+                         tablaDeSimbolos.agregar(acceso, variable.identificador, tipo_var, val,variable.fila,variable.columna);
+                    }
+                   
                 } else {
                     console.error("Operacion sin sentido dentro del AST " + variable);
                 }
             }else{
-                reportarError("Semantico", "La siguiente variable "+JSON.stringify(variable.valor.valor)+"<br> no acepta tipos de datos<br> que se intentan insertar" , 0, 0);
+                reportarError("Semantico", "La siguiente variable "+variable.identificador+"<br> no acepta tipos de datos<br> que se intentan insertar" , variable.fila,variable.columna);
             }
         } else {
-            reportarError("Semantico", "La siguiente variable ya existe:<br>" + variable.identificador, 0, 0);
+            reportarError("Semantico", "La siguiente variable ya existe:<br>" + variable.identificador, variable.fila,variable.columna);
         }
     }
 }
@@ -129,8 +136,13 @@ function procesarExpresionCadena(expresion, tablaDeSimbolos) {
 
     if (expresion.tipo === TIPO_OPERACION.CONCATENACION) {
 
-        const cadIzq = procesarExpresionCadena(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
-        const cadDer = procesarExpresionCadena(expresion.operandoDer, tablaDeSimbolos);      // resolvemos el operando derecho.
+        let cadIzq = procesarExpresionCadena(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
+        let cadDer = procesarExpresionCadena(expresion.operandoDer, tablaDeSimbolos);      // resolvemos el operando derecho.
+        if(cadIzq==null){
+            cadIzq="";
+        } if(cadDer==null){
+            cadDer="";
+        }
         return cadIzq.toString() + cadDer.toString();
     } else if (expresion.tipo === TIPO_VALOR.CADENA) {
         var val = parseCadena.parse(expresion.valor);
@@ -170,11 +182,11 @@ function procesarExpresionCadena(expresion, tablaDeSimbolos) {
             if(indice<valores.length){
                 return valores[indice];
             }else{
-                reportarError("Semantico", "El tamaño del arreglo: "+valores.length+" es menor o igual al indice colocado: " + indice, 0, 0);
+                reportarError("Semantico", "El tamaño del arreglo: "+valores.length+" es menor o igual al indice colocado: " + indice, simbolo.fila, simbolo.columna);
                 return 0;
             } 
         } else {
-            reportarError("Semantico", "No es de tipo booleano esta variable:<br>" + expresion.valor, 0, 0);
+            reportarError("Semantico", "No es de tipo booleano esta variable:<br>" + expresion.valor, variable.fila, variable.columna);
         }
     } else if (expresion.tipo === TIPO_VALOR.POP&&(tablaDeSimbolos.obtenerTipo(expresion.valor) == "boolean")) {
         return procesarPop(expresion,tablaDeSimbolos);
@@ -188,11 +200,11 @@ function procesarExpresionCadena(expresion, tablaDeSimbolos) {
             if(indice<valores.length){
                 return valores[indice];
             }else{
-                reportarError("Semantico", "El tamaño del arreglo: "+valores.length+" es menor o igual al indice colocado: " + indice, 0, 0);
+                reportarError("Semantico", "El tamaño del arreglo: "+valores.length+" es menor o igual al indice colocado: " + indice, simbolo.fila, simbolo.columna);
                 return 0;
             } 
         } else {
-            reportarError("Semantico", "No es de tipo STRING esta variable:<br>" + expresion.valor, 0, 0);
+            reportarError("Semantico", "No es de tipo STRING esta variable:<br>" + expresion.valor, expresion.fila, expresion.columna);
         }
     }else {
         console.error("Instruccion no reconocida: " + JSON.stringify(expresion));
@@ -204,7 +216,7 @@ function procesarExpresionNumerica(expresion, tablaDeSimbolos) {
     if (expresion.tipo === TIPO_VALOR.NUMERO) {
         return expresion.valor;
     } else if (expresion.tipo === TIPO_VALOR.IDENTIFICADOR) {
-        //console.log(JSON.stringify(expresion));
+        
         if (tablaDeSimbolos.obtenerTipo(expresion.valor) == "number") {
             return procesarConsultaVariable(expresion, tablaDeSimbolos);
         } else {
@@ -246,8 +258,10 @@ function procesarExpresionNumerica(expresion, tablaDeSimbolos) {
         return valor * -1;
     }else if (expresion.tipo === TIPO_OPERACION.POTENCIA) {
 
-        const valor = procesarExpresionNumerica(expresion.operandoIzq, tablaDeSimbolos);     // resolvemos el operando
-        return valor * valor;
+        let valorIzq = procesarExpresionNumerica(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
+        let valorDer = procesarExpresionNumerica(expresion.operandoDer, tablaDeSimbolos);  
+
+        return Math.pow(valorIzq,valorDer) ;
     }else if (expresion.tipo === TIPO_OPERACION.MODULAR) {
 
         const valorIzq = procesarExpresionNumerica(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
@@ -271,9 +285,9 @@ function procesarExpresionLogicaNumerica(expresion, tablaDeSimbolos) {
 function procesarExpresionLogica(expresion, tablaDeSimbolos) {
     const valorIzq = procesarExpresionCadena(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
     const valorDer = procesarExpresionCadena(expresion.operandoDer, tablaDeSimbolos);      // resolvemos el operando derecho.
-
-    if (expresion.tipo === TIPO_OPERACION.IGUAL) return valorIzq == valorDer;
-    if (expresion.tipo === TIPO_OPERACION.DIFERENTE) return valorIzq != valorDer;
+    
+    if (expresion.tipo === TIPO_OPERACION.IGUAL){ return (valorIzq) == (valorDer);}
+    if (expresion.tipo === TIPO_OPERACION.DIFERENTE) {return (valorIzq) != (valorDer);}
 
 }
 
@@ -296,12 +310,12 @@ function procesarExpresionComparativa(expresion, tablaDeSimbolos) {
 function graficar(tablaDeSimbolos) {
     limpiarAmb();
     for (const variable of tablaDeSimbolos._simbolos) {
-        addVariable(variable.id, variable.tipo, variable.ambito);
+        addVariable(variable.id, variable.tipo, variable.ambito,variable.fila,variable.columna);
     }
 }
 
 
-function puedoInsertar(expresion, tipo,tablaDeSimbolos) {
+function puedoInsertar(expresion, tipo,tablaDeSimbolos,fila,columna) {
     if (tipo === null || expresion === null) {
         return true;
     }
@@ -331,11 +345,19 @@ function puedoInsertar(expresion, tipo,tablaDeSimbolos) {
     } else if ((expresion.tipo == TIPO_OPERACION.AND || expresion.tipo === TIPO_OPERACION.OR || expresion.tipo === TIPO_OPERACION.NEGACION) && tipo === "boolean") {
         return true;
     }else if(expresion.tipo == TIPO_VALOR.IDENTIFICADOR||(expresion.tipo == TIPO_VALOR.ARREGLO)||(expresion.tipo == TIPO_VALOR.POP)){
-        return tipo===tablaDeSimbolos.obtenerTipo(expresion.valor);
+        if( tipo===tablaDeSimbolos.obtenerTipo(expresion.valor)){
+            return  tipo===tablaDeSimbolos.obtenerTipo(expresion.valor);
+        }else{
+            if(tipo==="String"&&"boolean"==tablaDeSimbolos.obtenerTipo(expresion.valor)){
+                return true
+            }
+            return false;
+        }
+        
     } else if(expresion.tipo == TIPO_VALOR.LENGTH&& tipo === "number"){
         return true;
     } else {
-        reportarError("Semantico", "No coinciden los datos:<br>" + "La variable es de tipo " + tipo + "<br>El valor es de tipo:<br>" + JSON.stringify(expresion.tipo), 0, 0);
+        reportarError("Semantico", "No coinciden los datos:<br>" + "La variable es de tipo " + tipo + "<br>El valor es de tipo:<br>" + JSON.stringify(expresion.tipo), fila, columna);
         return false;
     }
 }
@@ -367,7 +389,7 @@ function tipoDato(expresion,tablaDeSimbolos) {
         return "boolean";
     } else if ((expresion.tipo == TIPO_VALOR.BOOLEANO)) {
         return "boolean";
-    } else if ((expresion.tipo == TIPO_OPERACION.AND || expresion.tipo === TIPO_OPERACION.OR || expresion.tipo === TIPO_OPERACION.NEGACION) && tipo === "boolean") {
+    } else if ((expresion.tipo == TIPO_OPERACION.AND || expresion.tipo === TIPO_OPERACION.OR || expresion.tipo === TIPO_OPERACION.NEGACION) ) {
         return "boolean";
     }else if(expresion.tipo == TIPO_VALOR.IDENTIFICADOR||expresion.tipo == TIPO_VALOR.ARREGLO||expresion.tipo == TIPO_VALOR.POP){
         return tablaDeSimbolos.obtenerTipo(expresion.valor);
@@ -396,7 +418,7 @@ function procesarIf(instruccion,tablaDeSimbolos){
     }else{
         if(instruccion.elseIf!="null"){
             if(instruccion.elseIf.tipo==TIPO_INSTRUCCION.ELSE){
-                procesarBloque(instruccion.elseIf.sentencias);
+                procesarBloque(instruccion.elseIf.sentencias,tablaDeSimbolos);
             }else{
                 procesarIf(instruccion.elseIf,tablaDeSimbolos);
             }
@@ -410,21 +432,21 @@ function procesarAsignaciones(instruccion, tablaDeSimbolos) {
     for (let variable of instruccion.asignacion) {
         if (!tablaDeSimbolos.verificarInsertar(variable.identificador)) {
             let auxVariable = tablaDeSimbolos.obtenerVariable(variable.identificador);
-            if (puedoInsertar(variable.valor,auxVariable.tipo,tablaDeSimbolos)) {
+            if (puedoInsertar(variable.valor,auxVariable.tipo,tablaDeSimbolos, variable.fila,variable.columna)) {
                 if(auxVariable.acceso!="const"&&(auxVariable.valor!="null"||auxVariable.valor!=null)){
                     auxVariable.tipo=tipoDato(variable.valor,tablaDeSimbolos);
                     auxVariable.valor = procesarExpresionCadena(variable.valor,tablaDeSimbolos);
-                    //console.log(JSON.stringify(variable));
+                    
                     tablaDeSimbolos.enviarVariable(auxVariable.id,auxVariable);
                 }else{
-                    console.log(auxVariable.valor!=="null"||auxVariable.valor!==null,auxVariable.acceso);
-                    reportarError("Semantico", "La variable es una constante y<br> no puede cambiar de dato ", 0, 0);    
+                    
+                    reportarError("Semantico", "La variable es una constante y<br> no puede cambiar de dato ",  variable.fila,variable.columna);    
                 }
             }else {
-                reportarError("Semantico", "La variable es de tipo: " + auxVariable.tipo+"<br>El valor es de tipo:<br>"+JSON.stringify(variable.valor), 0, 0);
+                reportarError("Semantico", "La variable es de tipo: " + auxVariable.tipo+"<br>El valor es de tipo:<br>"+JSON.stringify(variable.valor),  variable.fila,variable.columna);
             }
         } else {
-            reportarError("Semantico", "La siguiente variable ya existe:<br>" + variable.identificador, 0, 0);
+            reportarError("Semantico", "No se puede insertar en:<br>" + variable.identificador+"<br> ya que no existe",  variable.fila,variable.columna);
         }
     }
 }
@@ -432,6 +454,14 @@ function procesarAsignaciones(instruccion, tablaDeSimbolos) {
 function procesarWhile(instruccion,tablaDeSimbolos){
     let condicion = procesarExpresionCadena(instruccion.condicion,tablaDeSimbolos);
     condicion=condicion.toString();
+    let a=instruccion.condicion;
+    
+    if(a.tipo){
+        if(a.tipo=="VAL_BOOLEANO"){
+            reportarError("Semantico", "No se puede colocar un valor fijo en un ciclo",  0,0);
+            return null;
+        }
+    }
     let tsWhl = new TS(tablaDeSimbolos.simbolos);
     let auxAmbito=ambito;
     nuevoAmbito();
@@ -516,26 +546,24 @@ function procesarFor(instruccion,tablaDeSimbolos){
 function procesarCrearArreglo(instruccion,tablaDeSimbolos){
     if(tablaDeSimbolos.verificarInsertarAsig(instruccion.id,ambito)){
         let datos=[];
-        let tipo;
+        let tipo=instruccion.tipo_var;
         for (const dato of instruccion.datos) {
-            if(puedoInsertar(dato, instruccion.tipo_var,tablaDeSimbolos)){
+            if(puedoInsertar(dato, tipo,tablaDeSimbolos,instruccion.fila, instruccion.columna)){
                 tipo=tipoDato(dato,tablaDeSimbolos);
                 let registro=procesarExpresionCadena(dato);
-                datos.unshift(registro);   
-            }else{
-                reportarError("Semantico", "No coinciden los datos:<br>" + "La variable es de tipo " + instruccion.tipo_var + "<br>El valor es de tipo:<br> " + JSON.stringify(dato.tipo), 0, 0);
+                datos.push(registro);   
             }
         }
-        tablaDeSimbolos.agregar(instruccion.acceso, instruccion.id, tipo, datos);
+        tablaDeSimbolos.agregar(instruccion.acceso, instruccion.id, tipo, datos,instruccion.fila, instruccion.columna);
     }else{
-        reportarError("Semantico", "La siguiente variable ya existe:<br>" + instruccion.id, 0, 0);
+        reportarError("Semantico", "La siguiente variable ya existe:<br>" + instruccion.id, instruccion.fila, instruccion.columna);
     }
 }
 
 function procesarAsignacionArreglo(instruccion,tablaDeSimbolos){
     if (!tablaDeSimbolos.verificarInsertar(instruccion.identificador)) {
         let auxVariable = tablaDeSimbolos.obtenerVariable(instruccion.identificador);
-        if (puedoInsertar(instruccion.valor,auxVariable.tipo,tablaDeSimbolos)) {
+        if (puedoInsertar(instruccion.valor,auxVariable.tipo,tablaDeSimbolos,instruccion.fila, instruccion.columna)) {
             if(auxVariable.acceso!="const"&&(auxVariable.valor!="null"||auxVariable.valor!=null)){
                 auxVariable.tipo=tipoDato(instruccion.valor,tablaDeSimbolos);
                 let registro = procesarExpresionCadena(instruccion.valor,tablaDeSimbolos);
@@ -546,20 +574,18 @@ function procesarAsignacionArreglo(instruccion,tablaDeSimbolos){
                 tablaDeSimbolos.enviarVariable(auxVariable.id,auxVariable);
             }else{
                
-                reportarError("Semantico", "La variable es una constante y<br> no puede cambiar de dato ", 0, 0);    
+                reportarError("Semantico", "La variable es una constante y<br> no puede cambiar de dato ", instruccion.fila, instruccion.columna);    
             }
-        }else {
-            reportarError("Semantico", "La variable es de tipo: " + auxVariable.tipo+"<br>El valor es de tipo:<br>"+JSON.stringify(instruccion.valor), 0, 0);
         }
     } else {
-        reportarError("Semantico", "La siguiente variable no existe:<br>" + instruccion.identificador, 0, 0);
+        reportarError("Semantico", "La siguiente variable no existe:<br>" + instruccion.identificador, instruccion.fila, instruccion.columna);
     }
 }
 function procesarPush(instruccion,tablaDeSimbolos){
     if (!tablaDeSimbolos.verificarInsertar(instruccion.identificador)) {
 
         let auxVariable = tablaDeSimbolos.obtenerVariable(instruccion.identificador);
-        if (puedoInsertar(instruccion.valor,auxVariable.tipo,tablaDeSimbolos)) {
+        if (puedoInsertar(instruccion.valor,auxVariable.tipo,tablaDeSimbolos,0,0)) {
             if(auxVariable.acceso!="const"&&(auxVariable.valor!="null"||auxVariable.valor!=null)){
                 auxVariable.tipo=tipoDato(instruccion.valor,tablaDeSimbolos);
                 let registro = procesarExpresionCadena(instruccion.valor,tablaDeSimbolos);
@@ -587,7 +613,7 @@ function procesarPop(expresion,tablaDeSimbolos){
         let auxVariable = tablaDeSimbolos.obtenerVariable(expresion.valor);
         return auxVariable.valor.pop();
     } else {
-        reportarError("Semantico", "La siguiente variable no existe para pop algo:<br>" + instruccion.identificador, 0, 0);
+        reportarError("Semantico", "La siguiente variable no existe para el pop:<br>" + instruccion.valor, instruccion.fila, instruccion.columna);
     }
 }
 
@@ -663,7 +689,7 @@ function procesarForOf(expresion,tablaDeSimbolos){
 
 
 function nuevoAmbito(){
- //   console.log(ambito);
+
     noAmbito++;
     ambito=ambLocal+noAmbito;
 }
@@ -671,5 +697,5 @@ function finAmbito(auxAmbito,borrar,tablaDeSimbolos){
     tablaDeSimbolos.limpiar(borrar);
     noAmbito--;
     ambito=auxAmbito;
-   // console.log(ambito);
+   
 }

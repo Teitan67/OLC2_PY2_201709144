@@ -99,11 +99,13 @@ const instruccionesAST = {
 			valor: valor
 		}
 	},
-	nuevoValorArreglo: function(valor,indice, tipo) {
+	nuevoValorArreglo: function(valor,indice, tipo,fila,columna) {
 		return {
 			tipo: tipo,
 			indice:indice,
-			valor: valor
+			valor: valor,
+			fila:fila,
+			columna:columna
 		}
 	},
 
@@ -116,12 +118,14 @@ const instruccionesAST = {
 			expresionCadena: expresionCadena
 		};
 	},
-	nuevaAsignacionArreglo:function(id,indice,valor){
+	nuevaAsignacionArreglo:function(id,indice,valor,fila,columna){
 		return{
 			tipo:TIPO_INSTRUCCION.ASIGNAR_ARREGLO,
 			identificador:id,
 			indice:indice,
-			valor:valor
+			valor:valor,
+			fila:fila,
+			columna:columna
 		}
 	},
 	/**
@@ -133,12 +137,14 @@ const instruccionesAST = {
 		}
 	},
 
-	crearVariable:function(id,tipo,valor){
+	crearVariable:function(id,tipo,valor,fila,columna){
 		return{
 			tipo: TIPO_OPERACION.CREAR_VAR,
 			identificador:id,
 			tipo_var:tipo,
-			valor:valor
+			valor:valor,
+			fila:fila,
+			columna:columna
 		}
 	},
 	nuevaVariable:function(acceso,variables){
@@ -154,11 +160,13 @@ const instruccionesAST = {
 			asignacion:asignaciones
 		}
 	},
-	nuevaAsignacion:function(id,valor){
+	nuevaAsignacion:function(id,valor,fila,columna){
 		return{
 			tipo: TIPO_OPERACION.ASIGNAR_VAR,
 			identificador:id,
-			valor:valor
+			valor:valor,
+			fila:fila,
+			columna:columna
 		}
 	},
 	graficar_ts:function(){
@@ -216,13 +224,15 @@ const instruccionesAST = {
 			sentencias:sentencias
 		}
 	},
-	nuevoArreglo:function(acceso,id,tipo_Var,datos){
+	nuevoArreglo:function(acceso,id,tipo_Var,datos,fila,columna){
 		return{
 			tipo: TIPO_INSTRUCCION.CREAR_ARREGLO,
 			acceso:acceso,
 			id: id,
 			tipo_var:tipo_Var,
-			datos:datos
+			datos:datos,
+			fila:fila,
+			columna:columna
 		}
 	},
 	nuevoLength:function(id){
@@ -238,10 +248,12 @@ const instruccionesAST = {
 			valor:dato
 		}
 	},
-	nuevoPop:function(id,tipo){
+	nuevoPop:function(id,tipo,fila,columna){
 		return{
 			tipo: tipo,
-			valor:id
+			valor:id,
+			fila:fila,
+			columna:columna
 		}
 	},
 	nuevoForIn:function(iterador,arreglo,sentencias){
@@ -260,19 +272,23 @@ const instruccionesAST = {
 			sentencias:sentencias
 		}
 	},
-	nuevaFuncionCreada:function(id,parametros,sentencias) {
+	nuevaFuncionCreada:function(id,parametros,sentencias,linea,columna) {
 		return{
 			tipo:TIPO_INSTRUCCION.FUNCION_NUEVA,
 			identificador:id,
 			parametros:parametros,
-			sentencias:sentencias
+			sentencias:sentencias,
+			fila:linea,
+			columna:columna
 		}
 	},
-	nuevaFuncionLlamada:function(id,parametros){
+	nuevaFuncionLlamada:function(id,parametros,fila,columna){
 		return{
 			tipo:TIPO_INSTRUCCION.FUNCION_LLAMAR,
 			identificador:id,
-			parametros:parametros
+			parametros:parametros,
+			fila:fila,
+			columna:columna
 		}
 	},
 	nuevoPrograma:function(programa){
