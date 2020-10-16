@@ -5,10 +5,8 @@ function procesarPrograma(instrucciones, tablaDeSimbolos) {
     let tabla=tablaDeSimbolos;
     for(let Lsentencia of programa){
         for(let sentencia of Lsentencia){
-            
             if(sentencia.tipo==TIPO_INSTRUCCION.FUNCION_NUEVA){
                 crearFuncion(sentencia,tabla);
-                
             }else{
                 procesarBloque(Lsentencia,tabla);
                 break;
@@ -22,10 +20,8 @@ function crearFuncion(instrucciones, tablaDeSimbolos){
 }
 
 function procesarBloque(instrucciones, tablaDeSimbolos) {
-    instrucciones.forEach(instruccion => {
-
-        if (instruccion.tipo === TIPO_INSTRUCCION.IMPRIMIR) {
-            // Procesando Instrucción Imprimir
+    for (let instruccion of instrucciones) {
+        if (instruccion.tipo === TIPO_INSTRUCCION.IMPRIMIR) {  
             procesarImprimir(instruccion, tablaDeSimbolos);
         } else if (instruccion.tipo === TIPO_INSTRUCCION.CREAR_VARIABLE) {
             procesarCreacionVariable(instruccion, tablaDeSimbolos);
@@ -36,17 +32,41 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
         } else if (instruccion.tipo == TIPO_INSTRUCCION.ASIGNACION) {
             procesarAsignaciones(instruccion, tablaDeSimbolos);
         } else if(instruccion.tipo==TIPO_INSTRUCCION.IF){
-            procesarIf(instruccion,tablaDeSimbolos);
+            let auxAmbito=ambito;
+            nuevoAmbito();
+            let regreso = procesarIf(instruccion,tablaDeSimbolos);
+            finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+            if(regreso){
+                return regreso;
+            }
         }else if(instruccion.tipo==TIPO_INSTRUCCION.WHILE){
-            procesarWhile(instruccion,tablaDeSimbolos);
+            let auxAmbito=ambito;
+            nuevoAmbito();
+            let regreso=procesarWhile(instruccion,tablaDeSimbolos);
+            finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+            if(regreso){
+                return regreso;
+            }
         }else if(instruccion.tipo==TIPO_INSTRUCCION.DO_WHILE){
+            let auxAmbito=ambito;
+            nuevoAmbito();
             procesarDoWhile(instruccion,tablaDeSimbolos);
+            finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+            if(regreso){
+                return regreso;
+            }
         }else if(instruccion.tipo==TIPO_INSTRUCCION.INCREMENTO){
             procesarIncremento(instruccion,tablaDeSimbolos);
         }else if(instruccion.tipo==TIPO_INSTRUCCION.DECREMENTO){
             procesarDecremento(instruccion,tablaDeSimbolos);
         }else if(instruccion.tipo==TIPO_INSTRUCCION.FOR){
-            procesarFor(instruccion,tablaDeSimbolos);
+            let auxAmbito=ambito;
+            nuevoAmbito();
+            let regreso=procesarFor(instruccion,tablaDeSimbolos);
+            finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+            if(regreso){
+                return regreso;
+            }
         }else if(instruccion.tipo==TIPO_INSTRUCCION.CREAR_ARREGLO){
             procesarCrearArreglo(instruccion,tablaDeSimbolos);
         }else if(instruccion.tipo==TIPO_INSTRUCCION.ASIGNAR_ARREGLO){
@@ -54,20 +74,41 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
         }else if(instruccion.tipo===TIPO_INSTRUCCION.PUSH){
             procesarPush(instruccion,tablaDeSimbolos);
         }else if(instruccion.tipo===TIPO_INSTRUCCION.FOR_IN){
-            procesarForIn(instruccion,tablaDeSimbolos);
+            let auxAmbito=ambito;
+            nuevoAmbito();
+            let regreso=procesarForIn(instruccion,tablaDeSimbolos);
+            finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+            if(regreso){
+                return regreso;
+            }
         }else if(instruccion.tipo===TIPO_INSTRUCCION.FOR_OF){
-            procesarForOf(instruccion,tablaDeSimbolos);
+            let auxAmbito=ambito;
+            nuevoAmbito();
+            let regreso=procesarForOf(instruccion,tablaDeSimbolos);
+            finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+            if(regreso){
+                return regreso;
+            }
         }else if(instruccion.tipo===TIPO_INSTRUCCION.FUNCION_LLAMAR){
             procesarFuncion(instruccion,tablaDeSimbolos);
+        }else if(instruccion.tipo===TIPO_INSTRUCCION.RETURN){
+            return procesarReturn(instruccion,tablaDeSimbolos);
         }else {
             console.error('ERROR: tipo de instrucción no válido: ' + JSON.stringify(instruccion));
         }
-    });
+    }
+}
+function procesarReturn(instruccion,tablaDeSimbolos){
+    if(instruccion.regreso){
+        let retorno = procesarExpresionCadena(instruccion.regreso,tablaDeSimbolos);
+        return retorno;
+    }else{
+        return null;
+    }
 }
 function procesarFuncion(instruccion,tablaDeSimbolos){
     
-    let funcion=obtenerFuncion(instruccion.identificador);
-    
+    let funcion=obtenerFuncion(instruccion.identificador);   
     if(funcion!==null){
         let auxAmbito=ambito;
         nuevoAmbito();
@@ -75,30 +116,27 @@ function procesarFuncion(instruccion,tablaDeSimbolos){
         let parametros_funcion=funcion.parametros;
         let variables_locales=[];
         let auxVarianle=null;
-        console.log(parametros_entrada);
-        console.log("entrada: ",parametros_entrada,"\nfuncion:",parametros_funcion);
         if (parametros_entrada.length==parametros_funcion.length){
             for (let i in parametros_entrada) {
                 auxVarianle=parametros_funcion[i];
-               // console.log(parametros_entrada[i]);
                 variables_locales.unshift(instruccionesAST.crearVariable(auxVarianle.identificador,auxVarianle.tipo_Var,parametros_entrada[i],funcion.fila,funcion.columna));
             }
             let ast_parametro=instruccionesAST.nuevaVariable("let",variables_locales);
             procesarCreacionVariable(ast_parametro, tablaDeSimbolos);
-            procesarBloque(funcion.sentencias,tablaDeSimbolos);
+            let regreso=procesarBloque(funcion.sentencias,tablaDeSimbolos);
+            finAmbito(auxAmbito,ambito,tablaDeSimbolos); 
+            return regreso;
             
         }else{
             reportarError("Semantico", "La siguiente funcion "+instruccion.identificador+"<br> tiene un numero de parametros invalidos" , instruccion.fila, instruccion.columna); 
         }
-        finAmbito(auxAmbito,ambito,tablaDeSimbolos); 
+       
     }else{
         reportarError("Semantico", "La siguiente funcion "+instruccion.identificador+"<br> no existe" , instruccion.fila, instruccion.columna); 
     }
 }
-
 function procesarCreacionVariable(instruccion, tablaDeSimbolos) {
     let acceso = instruccion.acceso;
-
     for (let variable of instruccion.variables) {
         if (tablaDeSimbolos.verificarInsertarAsig(variable.identificador,ambito)) {
             if (puedoInsertar(variable.valor, variable.tipo_var,tablaDeSimbolos, variable.fila,variable.columna)) {
@@ -126,26 +164,29 @@ function procesarCreacionVariable(instruccion, tablaDeSimbolos) {
         }
     }
 }
-
 function procesarImprimir(instruccion, tablaDeSimbolos) {
+    
     const cadena = procesarExpresionCadena(instruccion.expresionCadena, tablaDeSimbolos);
     consolAdd(cadena);
 }
-
 function procesarExpresionCadena(expresion, tablaDeSimbolos) {
 
+    //console.log(expresion);
     if (expresion.tipo === TIPO_OPERACION.CONCATENACION) {
-
+        
         let cadIzq = procesarExpresionCadena(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
         let cadDer = procesarExpresionCadena(expresion.operandoDer, tablaDeSimbolos);      // resolvemos el operando derecho.
         if(cadIzq==null){
             cadIzq="";
-        } if(cadDer==null){
+        } 
+        if(cadDer==null){
             cadDer="";
         }
         return cadIzq.toString() + cadDer.toString();
     } else if (expresion.tipo === TIPO_VALOR.CADENA) {
-        var val = parseCadena.parse(expresion.valor);
+        
+        let val = parseCadena.parse(expresion.valor);
+        
         return val;
     } else if (expresion.tipo === TIPO_VALOR.NUMERO
         || expresion.tipo === TIPO_OPERACION.SUMA
@@ -206,11 +247,24 @@ function procesarExpresionCadena(expresion, tablaDeSimbolos) {
         } else {
             reportarError("Semantico", "No es de tipo STRING esta variable:<br>" + expresion.valor, expresion.fila, expresion.columna);
         }
+    }else if(expresion.tipo===TIPO_OPERACION.MAS){
+        
+        if(tipoDato(expresion.operandoDer,tablaDeSimbolos)=="number"&&tipoDato(expresion.operandoIzq,tablaDeSimbolos)=="number"){
+            expresion.tipo=TIPO_OPERACION.SUMA;
+
+        }else{
+            expresion.tipo=TIPO_OPERACION.CONCATENACION;
+        }
+        
+        let cadena=procesarExpresionCadena(expresion,tablaDeSimbolos);
+        
+        return cadena;
+    }else if(expresion.tipo===TIPO_INSTRUCCION.FUNCION_LLAMAR){
+        return procesarFuncion(expresion,tablaDeSimbolos);
     }else {
         console.error("Instruccion no reconocida: " + JSON.stringify(expresion));
     }
 }
-
 function procesarExpresionNumerica(expresion, tablaDeSimbolos) {
     
     if (expresion.tipo === TIPO_VALOR.NUMERO) {
@@ -267,9 +321,20 @@ function procesarExpresionNumerica(expresion, tablaDeSimbolos) {
         const valorIzq = procesarExpresionNumerica(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
         const valorDer = procesarExpresionNumerica(expresion.operandoDer, tablaDeSimbolos);      // resolvemos el operando derecho.
         return valorIzq % valorDer;
+    }else if(expresion.tipo===TIPO_OPERACION.MAS){
+        
+        if(tipoDato(expresion.operandoDer,tablaDeSimbolos)=="number"&&tipoDato(expresion.operandoIzq,tablaDeSimbolos)=="number"){
+            expresion.tipo=TIPO_OPERACION.SUMA;
+
+        }else{
+            expresion.tipo=TIPO_OPERACION.CONCATENACION;
+        }
+        
+        let cadena=procesarExpresionCadena(expresion,tablaDeSimbolos);
+       // console.log(JSON.stringify(expresion),"\n");
+        return cadena;
     }
 }
-
 function procesarExpresionLogicaNumerica(expresion, tablaDeSimbolos) {
     // En este caso necesitamos procesar los operandos antes de realizar la comparación.
     const valorIzq = procesarExpresionNumerica(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
@@ -281,7 +346,6 @@ function procesarExpresionLogicaNumerica(expresion, tablaDeSimbolos) {
     if (expresion.tipo === TIPO_OPERACION.MENOR_IGUAL) return valorIzq <= valorDer;
 
 }
-
 function procesarExpresionLogica(expresion, tablaDeSimbolos) {
     const valorIzq = procesarExpresionCadena(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
     const valorDer = procesarExpresionCadena(expresion.operandoDer, tablaDeSimbolos);      // resolvemos el operando derecho.
@@ -290,31 +354,32 @@ function procesarExpresionLogica(expresion, tablaDeSimbolos) {
     if (expresion.tipo === TIPO_OPERACION.DIFERENTE) {return (valorIzq) != (valorDer);}
 
 }
-
 function procesarExpresionComparativa(expresion, tablaDeSimbolos) {
 
     if (expresion.tipo === TIPO_OPERACION.NEGACION) {
 
-        const valor = procesarExpresionCadena(expresion.operandoIzq, tablaDeSimbolos);     // resolvemos el operando
-        return !valor;
-
+        let valor = procesarExpresionCadena(expresion.operandoIzq, tablaDeSimbolos);     // resolvemos el operando
+        if(valor==true||valor=="true"){
+            return false;
+        }else if(valor==false||valor=="false"){
+            return true;
+        }else{
+            return !valor;
+        }
     } else {
         const valorIzq = procesarExpresionCadena(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
         const valorDer = procesarExpresionCadena(expresion.operandoDer, tablaDeSimbolos);      // resolvemos el operando derecho.
 
-        if (expresion.tipo === TIPO_OPERACION.AND) return valorIzq && valorDer;
+        if (expresion.tipo === TIPO_OPERACION.AND) return Boolean(valorIzq) && Boolean(valorDer);
         if (expresion.tipo === TIPO_OPERACION.OR) return valorIzq || valorDer;
     }
 }
-
 function graficar(tablaDeSimbolos) {
     limpiarAmb();
     for (const variable of tablaDeSimbolos._simbolos) {
         addVariable(variable.id, variable.tipo, variable.ambito,variable.fila,variable.columna);
     }
 }
-
-
 function puedoInsertar(expresion, tipo,tablaDeSimbolos,fila,columna) {
     if (tipo === null || expresion === null) {
         return true;
@@ -356,14 +421,27 @@ function puedoInsertar(expresion, tipo,tablaDeSimbolos,fila,columna) {
         
     } else if(expresion.tipo == TIPO_VALOR.LENGTH&& tipo === "number"){
         return true;
-    } else {
+    }  else if(expresion.tipo == "INSTR_FUNCION_LLAMADA"){
+        return true;
+    }else if(expresion.tipo===TIPO_OPERACION.MAS){
+        
+        if(tipoDato(expresion.operandoDer,tablaDeSimbolos)=="number"&&tipoDato(expresion.operandoIzq,tablaDeSimbolos)=="number"){
+           return true
+
+        }else{
+            
+           return true;
+        }
+
+    }else {
         reportarError("Semantico", "No coinciden los datos:<br>" + "La variable es de tipo " + tipo + "<br>El valor es de tipo:<br>" + JSON.stringify(expresion.tipo), fila, columna);
         return false;
     }
 }
-//mimir
+
 function tipoDato(expresion,tablaDeSimbolos) {
-    if (expresion === null) {
+    
+    if (expresion === null||expresion===undefined) {
         return null;
     }
     if (expresion.tipo === TIPO_OPERACION.CONCATENACION) {
@@ -395,6 +473,15 @@ function tipoDato(expresion,tablaDeSimbolos) {
         return tablaDeSimbolos.obtenerTipo(expresion.valor);
     } else if(expresion.tipo == TIPO_VALOR.LENGTH){
         return "number";
+    }else if(expresion.tipo===TIPO_OPERACION.MAS){
+        
+        if(tipoDato(expresion.operandoDer,tablaDeSimbolos)=="number"&&tipoDato(expresion.operandoIzq,tablaDeSimbolos)=="number"){
+            return "number";
+
+        }else{
+            return null;
+        }
+
     }else {
 
         return null;
@@ -410,22 +497,25 @@ function procesarConsultaVariable(expresion, tablaDeSimbolos) {
 function procesarIf(instruccion,tablaDeSimbolos){
     let condicion = procesarExpresionCadena(instruccion.condicion,tablaDeSimbolos);
     condicion=condicion.toString();
-    const tsIf = new TS(tablaDeSimbolos.simbolos);
-    let auxAmbito=ambito;
-    nuevoAmbito();
     if(condicion==="true"){
-        procesarBloque(instruccion.sentencias,tablaDeSimbolos);
+        let regreso =procesarBloque(instruccion.sentencias,tablaDeSimbolos);
+        if(regreso){
+            return regreso;
+        }
     }else{
         if(instruccion.elseIf!="null"){
             if(instruccion.elseIf.tipo==TIPO_INSTRUCCION.ELSE){
-                procesarBloque(instruccion.elseIf.sentencias,tablaDeSimbolos);
+                let regreso=procesarBloque(instruccion.elseIf.sentencias,tablaDeSimbolos);
+                if(regreso){
+                    return regreso;
+                }
             }else{
                 procesarIf(instruccion.elseIf,tablaDeSimbolos);
             }
             
         }
     }
-    finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+    
 }
 
 function procesarAsignaciones(instruccion, tablaDeSimbolos) {
@@ -462,30 +552,29 @@ function procesarWhile(instruccion,tablaDeSimbolos){
             return null;
         }
     }
-    let tsWhl = new TS(tablaDeSimbolos.simbolos);
-    let auxAmbito=ambito;
-    nuevoAmbito();
     while (condicion==="true") {
-        procesarBloque(instruccion.sentencias,tablaDeSimbolos);
+        let regreso=procesarBloque(instruccion.sentencias,tablaDeSimbolos);
+        if(regreso){
+            return regreso;
+        }
         condicion = procesarExpresionCadena(instruccion.condicion,tablaDeSimbolos);
         condicion=condicion.toString();
     }
-    finAmbito(auxAmbito,ambito,tablaDeSimbolos);
 }
 
 function procesarDoWhile(instruccion,tablaDeSimbolos){
     let condicion = procesarExpresionCadena(instruccion.condicion,tablaDeSimbolos);
     condicion=condicion.toString();
-    let tsDoWhl = new TS(tablaDeSimbolos.simbolos);
-    let auxAmbito=ambito;
-    nuevoAmbito();
     do{
-        procesarBloque(instruccion.sentencias,tablaDeSimbolos);
+        let regreso =procesarBloque(instruccion.sentencias,tablaDeSimbolos);
+        if(regreso){
+            return regreso;
+        }
         condicion = procesarExpresionCadena(instruccion.condicion,tablaDeSimbolos);
         condicion=condicion.toString();
 
     }while (condicion==="true")
-    finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+
 }
 
 function procesarIncremento(instruccion,tablaDeSimbolos){
@@ -513,11 +602,6 @@ function procesarDecremento(instruccion,tablaDeSimbolos){
 }
 
 function procesarFor(instruccion,tablaDeSimbolos){
-
-    let tsFor = new TS(tablaDeSimbolos.simbolos);
-    let auxAmbito=ambito;
-    nuevoAmbito();
-
     if(instruccion.variable.tipo === TIPO_INSTRUCCION.CREAR_VARIABLE){
         procesarCreacionVariable(instruccion.variable,tablaDeSimbolos);
     }else{
@@ -527,8 +611,14 @@ function procesarFor(instruccion,tablaDeSimbolos){
     condicion=condicion.toString();
 
     while (condicion==="true") {
-        procesarBloque(instruccion.sentencias,tablaDeSimbolos);
+        let auxAmbito=ambito;
+        nuevoAmbito();
 
+        let regreso=procesarBloque(instruccion.sentencias,tablaDeSimbolos);
+        finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+        if(regreso){
+            return regreso;
+        }
         if(instruccion.incremento.tipo === TIPO_INSTRUCCION.INCREMENTO){
             procesarIncremento(instruccion.incremento,tablaDeSimbolos);
         }else if(instruccion.incremento.tipo==TIPO_INSTRUCCION.DECREMENTO){
@@ -539,8 +629,6 @@ function procesarFor(instruccion,tablaDeSimbolos){
         condicion = procesarExpresionCadena(instruccion.condicion,tablaDeSimbolos);
         condicion=condicion.toString();
     }
-    finAmbito(auxAmbito,ambito,tablaDeSimbolos);
-
 }
 
 function procesarCrearArreglo(instruccion,tablaDeSimbolos){
@@ -619,8 +707,6 @@ function procesarPop(expresion,tablaDeSimbolos){
 
 function procesarForIn(expresion,tablaDeSimbolos){
     let auxiterador;
-    let auxAmbito=ambito;
-    nuevoAmbito();
     if (!tablaDeSimbolos.verificarInsertar(expresion.iterador)) {
         auxiterador = tablaDeSimbolos.obtenerVariable(expresion.iterador);
         if(!auxiterador.tipo==="number"){
@@ -639,18 +725,19 @@ function procesarForIn(expresion,tablaDeSimbolos){
         while(i<auxArreglo-1){
             auxiterador = tablaDeSimbolos.obtenerVariable(expresion.iterador);
             i=auxiterador.valor;
-            procesarBloque(expresion.sentencias,tablaDeSimbolos);
+            let regreso=procesarBloque(expresion.sentencias,tablaDeSimbolos);
+            if(regreso){
+                return regreso;
+            }
             procesarIncremento(instruccionesAST.nuevoIncremento(expresion.iterador),tablaDeSimbolos);
         }
-        finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+        
     }else{
         reportarError("Semantico", "El arreglo a iterar no existe:<br>" + instruccion.arreglo, 0, 0);
     }
 }
 
 function procesarForOf(expresion,tablaDeSimbolos){
-    let auxAmbito=ambito;
-    nuevoAmbito();
     let valorIterado;
     if (!tablaDeSimbolos.verificarInsertar(expresion.iterador)) {
         valorIterado = tablaDeSimbolos.obtenerVariable(expresion.iterador);
@@ -668,10 +755,12 @@ function procesarForOf(expresion,tablaDeSimbolos){
         while(i<auxArreglo){
             valorIterado.valor=array.valor[i];
             tablaDeSimbolos.enviarVariable(valorIterado.id,valorIterado);
-            procesarBloque(expresion.sentencias,tablaDeSimbolos);
+            let regreso =procesarBloque(expresion.sentencias,tablaDeSimbolos);
+            if(regreso){
+                return regreso;
+            }
             i++;
-        }
-        finAmbito(auxAmbito,ambito,tablaDeSimbolos);   
+        }   
     }else{
         reportarError("Semantico", "El arreglo a iterar no existe:<br>" + instruccion.arreglo, 0, 0);
     }
@@ -695,7 +784,7 @@ function nuevoAmbito(){
 }
 function finAmbito(auxAmbito,borrar,tablaDeSimbolos){
     tablaDeSimbolos.limpiar(borrar);
-    noAmbito--;
+    --noAmbito;
     ambito=auxAmbito;
    
 }

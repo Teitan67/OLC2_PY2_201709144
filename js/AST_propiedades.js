@@ -22,7 +22,7 @@ const TIPO_OPERACION = {
 	NEGATIVO:       'OP_NEGATIVO',
 	POTENCIA:		'OP_POTENCIA',
 	MODULAR:		'OP_MODULAR',
-	
+	MAS:			'OP_MAS',
 	MAYOR_QUE:      'OP_MAYOR_QUE',
 	MENOR_QUE:      'OP_MENOR_QUE',
 	MAYOR_IGUAL:    'OP_MAYOR_IGUAL',
@@ -93,7 +93,7 @@ const instruccionesAST = {
 	/**
 	 * Crea un nuevo objeto tipo Valor, esto puede ser una cadena, un número o un identificador
 	 */
-	nuevoValor: function(valor, tipo) {
+	nuevoValor: function(valor, tipo,fila,columna) {
 		return {
 			tipo: tipo,
 			valor: valor
@@ -302,6 +302,12 @@ const instruccionesAST = {
 			tipo:TIPO_VALOR.PARAMETRO,
 			identificador:id,
 			tipo_Var:tipo_Var
+		}
+	},
+	nuevoReturn:function(regreso){
+		return{
+			tipo:TIPO_INSTRUCCION.RETURN,
+			regreso:regreso
 		}
 	}
 }

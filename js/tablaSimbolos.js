@@ -34,7 +34,7 @@ class TS {
 
     agregar(acceso,id, tipo, valor,fila,columna) {
         const nuevoSimbolo = crearSimbolo(acceso,id, tipo, valor,fila,columna);
-        this._simbolos.push(nuevoSimbolo);
+        this._simbolos.unshift(nuevoSimbolo);
     }
 
     actualizar(id, valor) {
@@ -130,3 +130,5 @@ const TIPO_FUNCION = {
     }
     return null
  }
+
+ let pilaReturn = [];
