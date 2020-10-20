@@ -93,6 +93,8 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
             procesarFuncion(instruccion,tablaDeSimbolos);
         }else if(instruccion.tipo===TIPO_INSTRUCCION.RETURN){
             return procesarReturn(instruccion,tablaDeSimbolos);
+        }else if(instruccion.tipo===TIPO_INSTRUCCION.BREAK){
+            return 0;
         }else {
             console.error('ERROR: tipo de instrucción no válido: ' + JSON.stringify(instruccion));
         }
@@ -375,7 +377,11 @@ function procesarExpresionComparativa(expresion, tablaDeSimbolos) {
     }
 }
 function graficar(tablaDeSimbolos) {
-    limpiarAmb();
+    noVariables=0;
+    var tabla = document.getElementById("tabla-amb");
+    
+    tabla.insertAdjacentHTML("beforeend", "<tr id =\"Cabeza-mb\"><td> No.</td><td> Nombre </td><td> Tipo </td><td> Ambito</td><td> Fila </td><td> Columna</td></tr>");
+    
     for (const variable of tablaDeSimbolos._simbolos) {
         addVariable(variable.id, variable.tipo, variable.ambito,variable.fila,variable.columna);
     }

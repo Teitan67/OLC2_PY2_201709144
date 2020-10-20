@@ -26,7 +26,7 @@
     <div class="btn-group" role="group" aria-label="Button group with nested dropdown" id="menu">
         <button type="button" class="btn btn-secondary" onclick="analizar()">Ejecutar <i class="fas fa-play"></i></button>
         <button type="button" class="btn btn-secondary">Traducir <i class="fas fa-file-code"></i></button>
-        <button type="button" class="btn btn-secondary">Optimizar </button>
+        <button type="button" class="btn btn-secondary">Optimizar <i class="fas fa-chart-line"></i></button>
         <div class="btn-group" role="group">
             <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
@@ -34,9 +34,8 @@
                 <i class="fas fa-file-invoice"></i>
             </button>
             <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                <a class="dropdown-item" href="#tabla-errores">Reporte de errores</a>
-                <!--<a class="dropdown-item" href="#">Reporte de tabla de simbolos</a>-->
-               <a class="dropdown-item" href="views/ast.html" target="_blank">Reporte de AST</a>
+                <a class="dropdown-item" href="#tabla-errores"><i class="fas fa-times"></i>    Reporte de errores</a>
+                <a class="dropdown-item" href="views/ast.html" target="_blank"><i class="fas fa-sitemap"></i>  Reporte de AST</a>
             </div>
         </div>
     </div>
@@ -46,18 +45,11 @@
     <div id="tabla-ambito" style="overflow-x:auto;">	
         <h4 id="Titulo">Ambito:</h4>
         <table id ="tabla-amb" class="tableSection">
-            <tr id ="Cabeza-mb">
-                <td> No.</td>
-                <td> Nombre </td>
-                <td> Tipo </td>
-                <td> Ambito</td>
-                <td> Fila </td>
-                <td> Columna</td>
-            </tr>
+
         </table>
     </div>
-    <textarea id="consol" rows="7" cols="180" disabled="false">Esperando comandos...</textarea>
-    <textarea id="traduccion"  rows="10" cols="180" disabled="false">Esperando codigo tres direcciones...</textarea>
+    <textarea id="consol" rows="9" cols="180" disabled="false">Esperando comandos...</textarea>
+    <textarea id="traduccion"  rows="7" cols="180" disabled="false">Esperando codigo tres direcciones...</textarea>
     <div id="tabla-errores">	
 			<h2 id="Titulo">Errores:</h2>
 			<table id ="tabla">
@@ -73,8 +65,9 @@
     </div>
 
     <div id="graph">
-        <h2 id="Titulo">AST JSON</h2>
-        <textarea id="JSONviwer"></textarea>
+        <h2 id="Titulo" >AST JSON</h2>
+        <input type="text" id="JSONviwer" rows="2" cols="80" multiple="true" disabled="false"/>
+        <button onclick="copiarAST()">Copiar</button>
     </div>
 
     <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.js"></script>

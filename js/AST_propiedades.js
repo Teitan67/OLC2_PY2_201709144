@@ -62,7 +62,9 @@ const TIPO_INSTRUCCION = {
 	FOR_OF:				'INSTR_FOR_OF',
 	FUNCION_NUEVA:    	'INSTR_FUNCION_NUEVA',
 	FUNCION_LLAMAR:		'INSTR_FUNCION_LLAMADA',
-	RETURN:				'INSTR_RETURN'
+	RETURN:				'INSTR_RETURN',
+	BREAK:				'INSTR_BREAK',
+	SWITCH:				'INSTR_SWITCH'
 }
 
 //Operacion generica
@@ -302,6 +304,24 @@ const instruccionesAST = {
 			tipo:TIPO_VALOR.PARAMETRO,
 			identificador:id,
 			tipo_Var:tipo_Var
+		}
+	},
+	nuevoBreak:function(){
+		return{
+			tipo:TIPO_INSTRUCCION.BREAK
+		}
+	},
+	nuevoSwitch:function(comparando,casos){
+		return{
+			tipo:TIPO_INSTRUCCION.SWITCH,
+			comparando:comparando,
+			casos:casos
+		}
+	},
+	nuevoCase:function(comparador,sentencias){
+		return{
+			comparador:comparador,
+			sentencias:sentencias
 		}
 	},
 	nuevoReturn:function(regreso){

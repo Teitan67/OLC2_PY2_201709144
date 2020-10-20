@@ -5,16 +5,11 @@ var editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
   theme: "darcula",
   firstLineNumber: 0
 });
-var editorJSON = CodeMirror.fromTextArea(document.getElementById('JSONviwer'), {
-  lineNumbers: true,
-  mode: "application/ld+json",
-  theme: "darcula",
-  firstLineNumber: 0
-});
+var editorJSON =document.getElementById('JSONviwer');
 
 function mostrarJSON(json){
-  editorJSON.setValue("");
-  editorJSON.setValue(json);
+  editorJSON.value="";
+  editorJSON.value=json;
 }
 //Funcionalidades nativas
 function consolAdd(texto) {
@@ -52,6 +47,7 @@ function analizar() {
 
 function limpiar(){
   consolClear();
+  limpiarAmb();
   $("#tabla #Cuerpo").remove(); 
   noErrores = 0 ;
 }
@@ -59,6 +55,7 @@ function limpiar(){
 function limpiarAmb(){
   noVariables=0;
   $("#tabla-amb #Cuerpop").remove(); 
+  $("#tabla-amb #Cabeza-mb").remove(); 
 }
 
 let noVariables=0;
@@ -69,16 +66,19 @@ function addVariable(nombre, tipo, ambito,fila,columna) {
   tabla.insertAdjacentHTML("beforeend", "<tr id='Cuerpop'><td>" + noVariables + "</td><td>" + nombre + "</td><td>" + tipo + "</td><td>" + ambito+"</td><td>" + fila + "</td><td>" + columna+"</td></tr>");
 
 }
-
-
-
-/*
-var arbol='node1[label="hola"]; node2[label="mimir"]; node1->node2';
-function mostrarAST(){
-  var code_graphviz='digraph  {   graph [bgcolor="transparent"];edge [color=white];node[style=filled];';
-  code_graphviz=code_graphviz+arbol+'}';
-  d3.select("#imgAST").graphviz()
-  .renderDot(code_graphviz);
+function copiarAST() {
+  var copyText = document.getElementById("JSONviwer");
+  copyText.select();
+  copyText.setSelectionRange(0, 99999)
+  document.execCommand("copy");
+  alert("Copied the text: " + copyText.value);
 }
 
-*/
+switch (key) {
+  case value:
+    
+    break;
+
+  default:
+    break;
+}

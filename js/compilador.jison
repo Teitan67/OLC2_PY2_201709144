@@ -147,7 +147,9 @@ SENTENCIAS:
     |INST_CREAR_ARREGLO                          {$$=$1;}
     |INST_ASIGNAR_ARREGLO                        {$$=$1;}
     |INST_PUSH                                   {$$=$1;}
+    |INST_SWITCH                                 {$$=$1;}
     |INST_FOR_IN                                 {$$=$1;}
+    |INST_BREAK                                  {$$=$1;}
     |INST_FOR_OF                                 {$$=$1;}
     |INST_FUNCION_LLAMADA   eos                  {$$=$1;}
     |INST_RETURN                                 {$$=$1;}
@@ -309,4 +311,18 @@ INST_FOR_OF :
 INST_RETURN:
      return_ DATO eos               {$$=instruccionesAST.nuevoReturn($2);}
     |return_  eos                   {$$=instruccionesAST.nuevoReturn(null);}
+;
+INST_BREAK:
+    break eos  {$$=instruccionesAST.nuevoBreak();}
+;
+INST_SWITCH:
+    switch pa DATO pc lla SWITCH_CUERPO llc {$$=instruccionesAST.nuevoSwitch($DATO,$SWITCH_CUERPO);}
+;
+SWITCH_CUERPO:
+     case DATO dspts LSENTENCIAS SWITCH_CUERPO          {$5.push(instruccionesAST.nuevoCase($2,$4));$$=$5;}
+    |case DATO dspts LSENTENCIAS SWITCH_DEFAUTL         {$5.push(instruccionesAST.nuevoCase($2,$4));$$=$5;}
+    |case DATO dspts LSENTENCIAS                        {$$=[instruccionesAST.nuevoCase($DATO,$LSENTENCIAS)];}
+;
+SWITCH_DEFAUTL:
+     default dspts LSENTENCIAS                          {$$=[instruccionesAST.nuevoCase($default,$LSENTENCIAS)];}
 ;
