@@ -10,8 +10,11 @@ const TIPO_VALOR = {
 	ATRIBUTO:	   'VAL_ATRIBUTO',
 	LENGTH: 	   'VAL_LENGTH',
 	POP:		   'VAL_POP',
-	PARAMETRO:	   'VAL_PARAMETRO'
-}
+	PARAMETRO:	   'VAL_PARAMETRO',
+	CHAR_AT: 	   'VAL_CHAR_AT',
+	LowerCase:	   'VAL_nuevoToLowerCase',
+	UpperCase:	   'VAL_nuevoToUpperCase'
+}	
 
 // Constantes para los tipos de 'operaciones' que soporta nuestra gramática.
 const TIPO_OPERACION = {
@@ -322,6 +325,25 @@ const instruccionesAST = {
 		return{
 			comparador:comparador,
 			sentencias:sentencias
+		}
+	},
+	nuevoCharAt:function(id,indice){
+		return{
+			tipo:TIPO_VALOR.CHAR_AT,
+			identificador:id,
+			indice:indice
+		}
+	},
+	nuevoToLowerCase:function(cadena){
+		return{
+			tipo:TIPO_VALOR.LowerCase,
+			cadena:cadena
+		}
+	},
+	nuevoToUpperCase:function(cadena){
+		return{
+			tipo:TIPO_VALOR.UpperCase,
+			cadena:cadena
 		}
 	},
 	nuevoReturn:function(regreso){

@@ -95,9 +95,40 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
             return procesarReturn(instruccion,tablaDeSimbolos);
         }else if(instruccion.tipo===TIPO_INSTRUCCION.BREAK){
             return 0;
+        }else if(instruccion.tipo===TIPO_INSTRUCCION.SWITCH){
+            let auxAmbito=ambito;
+            nuevoAmbito();
+            let regreso=procesarSwitch(instruccion,tablaDeSimbolos);
+            finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+            if(regreso){
+                return regreso;
+            }
         }else {
             console.error('ERROR: tipo de instrucción no válido: ' + JSON.stringify(instruccion));
         }
+    }
+}
+function procesarSwitch(instruccion,tablaDeSimbolos){
+    let comparador =procesarExpresionCadena(instruccion.comparando,tablaDeSimbolos);
+    let casos=instruccion.casos;
+    let regreso=null;
+    let default_=null;
+    for(let caso of casos ){
+        
+        let comparando2=procesarExpresionCadena(caso.comparador,tablaDeSimbolos);
+        if(comparando2==comparador){
+            regreso= procesarBloque(caso.sentencias,tablaDeSimbolos);
+            if(regreso!=null){
+                return regreso;
+            }
+        }else if(comparando2=="default"){
+            default_=caso;
+        }
+    }
+    
+    regreso=procesarBloque(default_.sentencias,tablaDeSimbolos);
+    if(regreso!=null){
+        return regreso;
     }
 }
 function procesarReturn(instruccion,tablaDeSimbolos){
@@ -263,9 +294,29 @@ function procesarExpresionCadena(expresion, tablaDeSimbolos) {
         return cadena;
     }else if(expresion.tipo===TIPO_INSTRUCCION.FUNCION_LLAMAR){
         return procesarFuncion(expresion,tablaDeSimbolos);
+    }else if(expresion.tipo==TIPO_VALOR.CHAR_AT){
+        return procesarCharAt(expresion,tablaDeSimbolos);
+    }else if(expresion.tipo==TIPO_VALOR.LowerCase){
+        return procesarLowerCase(expresion,tablaDeSimbolos);
+    }else if(expresion.tipo==TIPO_VALOR.UpperCase){
+        return procesarUpperCase(expresion,tablaDeSimbolos);
     }else {
         console.error("Instruccion no reconocida: " + JSON.stringify(expresion));
     }
+}
+function procesarCharAt(expresion,tablaDeSimbolos){
+    let cadena = procesarExpresionCadena(expresion.identificador,tablaDeSimbolos);
+    let numero = procesarExpresionNumerica(expresion.indice,tablaDeSimbolos);
+    let caracter=cadena.charAt(numero);
+    return caracter;
+}
+function  procesarUpperCase(expresion,tablaDeSimbolos){
+    let cadena = procesarExpresionCadena(expresion.cadena,tablaDeSimbolos);
+    return cadena.toUpperCase();
+}
+function procesarLowerCase(expresion,tablaDeSimbolos){
+    let cadena = procesarExpresionCadena(expresion.cadena,tablaDeSimbolos);
+    return cadena.toLowerCase();
 }
 function procesarExpresionNumerica(expresion, tablaDeSimbolos) {
     

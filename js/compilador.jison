@@ -43,6 +43,10 @@
 "length"                    return 'length';
 "pop"                       return 'pop';
 "push"                      return 'push';
+"CharAt"                    return 'CharAt';
+"ToLowerCase"               return 'ToLowerCase';
+"ToUpperCase"               return 'ToUpperCase';
+"Concat"                    return 'Concat';
 ">="                        return 'mayorIgual';
 "<="                        return 'menorIgual';
 ">"                         return 'mayor';
@@ -153,6 +157,7 @@ SENTENCIAS:
     |INST_FOR_OF                                 {$$=$1;}
     |INST_FUNCION_LLAMADA   eos                  {$$=$1;}
     |INST_RETURN                                 {$$=$1;}
+    
     |error eos                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1),this._$.first_line-1 ,this._$.first_column);}
     |error llc                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1),this._$.first_line-1 ,this._$.first_column);}
 ;
@@ -182,7 +187,13 @@ DATO:
 
     |id pt length                   { $$ = instruccionesAST.nuevoLength($1);}
     |id pt pop pa pc                { $$ = instruccionesAST.nuevoPop($1, TIPO_VALOR.POP,this._$.first_line-1,this._$.first_column);}
-    |INST_FUNCION_LLAMADA           {$$=$1;}
+    |INST_FUNCION_LLAMADA           { $$ = $1;}
+    
+    |id pt CharAt pa DATO pc        { $$ = instruccionesAST.nuevoCharAt(instruccionesAST.nuevoValor($1,TIPO_VALOR.IDENTIFICADOR,this._$.first_line-1,this._$.first_column),$5);}
+    |id pt ToLowerCase pa pc        { $$ = instruccionesAST.nuevoToLowerCase(instruccionesAST.nuevoValor($1,TIPO_VALOR.IDENTIFICADOR,this._$.first_line-1,this._$.first_column));}
+    |id pt ToUpperCase pa pc        { $$ = instruccionesAST.nuevoToUpperCase(instruccionesAST.nuevoValor($1,TIPO_VALOR.IDENTIFICADOR,this._$.first_line-1,this._$.first_column));}
+    |id pt Concat pa DATO pc        { $$ = instruccionesAST.nuevoOperacionBinaria(instruccionesAST.nuevoValor($1,TIPO_VALOR.IDENTIFICADOR,this._$.first_line-1,this._$.first_column),$5,TIPO_OPERACION.CONCATENACION);}
+
 //Aritmeticas
 
     |DATO mas       DATO            { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.MAS);}
@@ -319,10 +330,10 @@ INST_SWITCH:
     switch pa DATO pc lla SWITCH_CUERPO llc {$$=instruccionesAST.nuevoSwitch($DATO,$SWITCH_CUERPO);}
 ;
 SWITCH_CUERPO:
-     case DATO dspts LSENTENCIAS SWITCH_CUERPO          {$5.push(instruccionesAST.nuevoCase($2,$4));$$=$5;}
-    |case DATO dspts LSENTENCIAS SWITCH_DEFAUTL         {$5.push(instruccionesAST.nuevoCase($2,$4));$$=$5;}
+     case DATO dspts LSENTENCIAS SWITCH_CUERPO          {$5.unshift(instruccionesAST.nuevoCase($2,$4));$$=$5;}
+    |case DATO dspts LSENTENCIAS SWITCH_DEFAUTL         {$5.unshift(instruccionesAST.nuevoCase($2,$4));$$=$5;}
     |case DATO dspts LSENTENCIAS                        {$$=[instruccionesAST.nuevoCase($DATO,$LSENTENCIAS)];}
 ;
 SWITCH_DEFAUTL:
-     default dspts LSENTENCIAS                          {$$=[instruccionesAST.nuevoCase($default,$LSENTENCIAS)];}
+     default dspts LSENTENCIAS                          {$$=[instruccionesAST.nuevoCase(instruccionesAST.nuevoValor($1,TIPO_VALOR.CADENA),$LSENTENCIAS)];} 
 ;

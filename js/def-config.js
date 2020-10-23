@@ -74,11 +74,3 @@ function copiarAST() {
   alert("Copied the text: " + copyText.value);
 }
 
-switch (key) {
-  case value:
-    
-    break;
-
-  default:
-    break;
-}
