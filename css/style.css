@@ -27,17 +27,7 @@ body{
     width: 90%;
     font-family: monospace;
 }
-#traduccion{
-    position: absolute;
-    top:  750px;
-    left: 50%;
-    color:white;
-    background: rgba(153, 205, 50, 0);
-    font-family: sans-serif;
-    width: 40%;
-    border:  none;
-   
-}
+
 #container {
     max-width: 400px;
     height: 400px;
@@ -61,4 +51,10 @@ body{
 #JSONviwer{
     color: chartreuse;
     background: black;
+}
+#area_traduccion{
+    position: absolute;
+    width: 43%;
+    top: 120%;
+    left: 50%;
 }

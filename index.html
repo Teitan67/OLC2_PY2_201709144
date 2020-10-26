@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="src/codemirror/lib/codemirror.css" />
     <script src="src/codemirror/lib/codemirror.js"></script>
     <script src="src/codemirror/mode/javascript/javascript.js"></script>
+    <script src="src/codemirror/mode/clike/clike.js"></script>
     <link rel="stylesheet" href="src/codemirror/theme/darcula.css" />
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="css/tabla_style.css"/>
@@ -25,7 +26,7 @@
 <body>
     <div class="btn-group" role="group" aria-label="Button group with nested dropdown" id="menu">
         <button type="button" class="btn btn-secondary" onclick="analizar()">Ejecutar <i class="fas fa-play"></i></button>
-        <button type="button" class="btn btn-secondary">Traducir <i class="fas fa-file-code"></i></button>
+        <button type="button" class="btn btn-secondary" onclick="traducir_a_C()">Traducir <i class="fas fa-file-code"></i></button>
         <button type="button" class="btn btn-secondary">Optimizar <i class="fas fa-chart-line"></i></button>
         <div class="btn-group" role="group">
             <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
@@ -49,7 +50,10 @@
         </table>
     </div>
     <textarea id="consol" rows="9" cols="180" disabled="false">Esperando comandos...</textarea>
-    <textarea id="traduccion"  rows="7" cols="180" disabled="false">Esperando codigo tres direcciones...</textarea>
+    <div id="area_traduccion">
+        <h4>Traduccion a C</h4>
+        <textarea id="traduccion"  rows="7" cols="180" disabled="false">Esperando codigo tres direcciones...</textarea>
+    </div>
     <div id="tabla-errores">	
 			<h2 id="Titulo">Errores:</h2>
 			<table id ="tabla">
@@ -81,12 +85,13 @@
         integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
         crossorigin="anonymous"></script>
 
- 
+    
     <script src="js/parseCadena.js"></script>
     <script src="js/tablaSimbolos.js"></script>
     <script src="js/AST_propiedades.js"></script>
     <script src="js/interprete.js"></script>
     <script src="js/compilador.js"></script>
+    <script src="js/traductorC.js"></script>
     <script src="js/def-config.js"></script>
 
 </body>

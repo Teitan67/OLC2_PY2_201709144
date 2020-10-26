@@ -5,6 +5,13 @@ var editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
   theme: "darcula",
   firstLineNumber: 0
 });
+
+var txt_C = CodeMirror.fromTextArea(document.getElementById('traduccion'), {
+  lineNumbers: true,
+  mode: "clike",
+  firstLineNumber: 0
+});
+
 var editorJSON =document.getElementById('JSONviwer');
 
 function mostrarJSON(json){
@@ -42,7 +49,7 @@ function analizar() {
   ast = compilador.parse(texto);
   mostrarJSON(JSON.stringify(ast)); 
   procesarPrograma(ast, tsGlobal);
-   
+  
 }
 
 function limpiar(){
