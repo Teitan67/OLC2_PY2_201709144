@@ -41,6 +41,7 @@ let tsGlobal;
 
 //Funciones del compilador
 function analizar() {
+  codigo="";
   tsGlobal = new TS([]);
   ambito=ambGlobal;
   funcionesTabla = [];

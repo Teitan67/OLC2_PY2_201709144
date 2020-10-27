@@ -1,5 +1,5 @@
 // Procesamos las instrucciones reconocidas en nuestro AST
-
+//LA VARIABLE codigo colocamos la traduccion a C
 function procesarPrograma(instrucciones, tablaDeSimbolos) {
     let programa = instrucciones.programa;
     let tabla=tablaDeSimbolos;
@@ -168,6 +168,7 @@ function procesarFuncion(instruccion,tablaDeSimbolos){
         reportarError("Semantico", "La siguiente funcion "+instruccion.identificador+"<br> no existe" , instruccion.fila, instruccion.columna); 
     }
 }
+
 function procesarCreacionVariable(instruccion, tablaDeSimbolos) {
     let acceso = instruccion.acceso;
     for (let variable of instruccion.variables) {
@@ -184,6 +185,7 @@ function procesarCreacionVariable(instruccion, tablaDeSimbolos) {
                         reportarError("Semantico", "La variable es una constante y<br> debe asignarse un dato ",  variable.fila,variable.columna); 
                     }else{
                          tablaDeSimbolos.agregar(acceso, variable.identificador, tipo_var, val,variable.fila,variable.columna);
+                         c_crearVariable(tipo_var, variable.identificador,variable.valor);
                     }
                    
                 } else {
@@ -197,6 +199,7 @@ function procesarCreacionVariable(instruccion, tablaDeSimbolos) {
         }
     }
 }
+
 function procesarImprimir(instruccion, tablaDeSimbolos) {
     
     const cadena = procesarExpresionCadena(instruccion.expresionCadena, tablaDeSimbolos);
