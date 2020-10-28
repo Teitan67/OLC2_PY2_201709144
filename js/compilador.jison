@@ -237,7 +237,6 @@ VARIABLES_CUERPO:
 
 VARIABLES_TIPO:
     dspts TIPO_DATO                                                     { $$ = $2;}
-    |                                                                   { $$ = null;}
 ;
 TIPO_DATO:
      boolean    { $$ = $1;}
