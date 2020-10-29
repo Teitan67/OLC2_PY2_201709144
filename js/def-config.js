@@ -41,6 +41,9 @@ let tsGlobal;
 
 //Funciones del compilador
 function analizar() {
+  p=0;
+  memoria=0;
+  noTemporal=0;
   codigo="";
   tsGlobal = new TS([]);
   ambito=ambGlobal;
@@ -68,10 +71,10 @@ function limpiarAmb(){
 
 let noVariables=0;
 
-function addVariable(nombre, tipo, ambito,fila,columna) {
+function addVariable(nombre, tipo, ambito,memoria,fila,columna) {
   ++noVariables;
   var tabla = document.getElementById("tabla-amb");
-  tabla.insertAdjacentHTML("beforeend", "<tr id='Cuerpop'><td>" + noVariables + "</td><td>" + nombre + "</td><td>" + tipo + "</td><td>" + ambito+"</td><td>" + fila + "</td><td>" + columna+"</td></tr>");
+  tabla.insertAdjacentHTML("beforeend", "<tr id='Cuerpop'><td>" + noVariables + "</td><td>" + nombre + "</td><td>" + tipo + "</td><td>" + ambito+"</td><td>"+memoria+"</td><td>" + fila + "</td><td>" + columna+"</td></tr>");
 
 }
 function copiarAST() {

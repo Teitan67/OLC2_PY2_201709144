@@ -184,10 +184,9 @@ function procesarCreacionVariable(instruccion, tablaDeSimbolos) {
                     if (variable.valor==null&&acceso=="const") {
                         reportarError("Semantico", "La variable es una constante y<br> debe asignarse un dato ",  variable.fila,variable.columna); 
                     }else{
-                         tablaDeSimbolos.agregar(acceso, variable.identificador, tipo_var, val,variable.fila,variable.columna);
-                         c_crearVariable(tipo_var, variable.identificador,variable.valor);
+                         tablaDeSimbolos.agregar(acceso, variable.identificador, tipo_var, val,variable.fila,variable.columna,memoria++);
+                         c_crearVariable(tipo_var, variable.identificador,variable.valor,tablaDeSimbolos);
                     }
-                   
                 } else {
                     console.error("Operacion sin sentido dentro del AST " + variable);
                 }
@@ -203,6 +202,7 @@ function procesarCreacionVariable(instruccion, tablaDeSimbolos) {
 function procesarImprimir(instruccion, tablaDeSimbolos) {
     
     const cadena = procesarExpresionCadena(instruccion.expresionCadena, tablaDeSimbolos);
+    c_procesarImprimir(instruccion.expresionCadena,tablaDeSimbolos);
     consolAdd(cadena);
 }
 function procesarExpresionCadena(expresion, tablaDeSimbolos) {
@@ -434,10 +434,10 @@ function graficar(tablaDeSimbolos) {
     noVariables=0;
     var tabla = document.getElementById("tabla-amb");
     
-    tabla.insertAdjacentHTML("beforeend", "<tr id =\"Cabeza-mb\"><td> No.</td><td> Nombre </td><td> Tipo </td><td> Ambito</td><td> Fila </td><td> Columna</td></tr>");
+    tabla.insertAdjacentHTML("beforeend", "<tr id =\"Cabeza-mb\"><td> No.</td><td> Nombre </td><td> Tipo </td><td> Ambito</td><td>Memoria</td><td> Fila </td><td> Columna</td></tr>");
     
     for (const variable of tablaDeSimbolos._simbolos) {
-        addVariable(variable.id, variable.tipo, variable.ambito,variable.fila,variable.columna);
+        addVariable(variable.id, variable.tipo, variable.ambito,variable.memoria,variable.fila,variable.columna);
     }
 }
 function puedoInsertar(expresion, tipo,tablaDeSimbolos,fila,columna) {
@@ -586,8 +586,8 @@ function procesarAsignaciones(instruccion, tablaDeSimbolos) {
                 if(auxVariable.acceso!="const"&&(auxVariable.valor!="null"||auxVariable.valor!=null)){
                     auxVariable.tipo=tipoDato(variable.valor,tablaDeSimbolos);
                     auxVariable.valor = procesarExpresionCadena(variable.valor,tablaDeSimbolos);
-                    
                     tablaDeSimbolos.enviarVariable(auxVariable.id,auxVariable);
+                    c_asignarVariable(auxVariable.id,variable.valor,auxVariable.tipo,tablaDeSimbolos);
                 }else{
                     
                     reportarError("Semantico", "La variable es una constante y<br> no puede cambiar de dato ",  variable.fila,variable.columna);    

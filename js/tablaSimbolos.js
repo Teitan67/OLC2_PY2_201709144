@@ -13,7 +13,7 @@ const TIPO_DATO = {
 }
 
 
-function crearSimbolo(acceso,id, tipo, valor,fila,columna) {
+function crearSimbolo(acceso,id, tipo, valor,fila,columna,memoria) {
     return {
         acceso:acceso,
         id: id,
@@ -21,7 +21,8 @@ function crearSimbolo(acceso,id, tipo, valor,fila,columna) {
         valor: valor,
         ambito:ambito,
         fila:fila,
-        columna:columna
+        columna:columna,
+        memoria:memoria
     }
 }
 
@@ -32,8 +33,8 @@ class TS {
         this._simbolos = simbolos;
     }
 
-    agregar(acceso,id, tipo, valor,fila,columna) {
-        const nuevoSimbolo = crearSimbolo(acceso,id, tipo, valor,fila,columna);
+    agregar(acceso,id, tipo, valor,fila,columna,memoria) {
+        const nuevoSimbolo = crearSimbolo(acceso,id, tipo, valor,fila,columna,memoria);
         this._simbolos.unshift(nuevoSimbolo);
     }
 
