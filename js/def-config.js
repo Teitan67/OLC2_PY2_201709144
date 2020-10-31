@@ -41,6 +41,7 @@ let tsGlobal;
 
 //Funciones del compilador
 function analizar() {
+  etiquetas=0;
   p=0;
   memoria=0;
   noTemporal=0;

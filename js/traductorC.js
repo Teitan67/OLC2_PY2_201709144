@@ -13,6 +13,7 @@ m_main+="int main() {\n";
 let p=0;
 let memoria=0;
 let noTemporal=0;
+let etiquetas=0;
 //==============================Manejo de tabla de simbolos===================
 let tbl_Aux=[];
 
@@ -75,9 +76,58 @@ function c_procesarExpresion(valor,tipo,tablaDeSimbolos){
             case TIPO_VALOR.IDENTIFICADOR:
                 const variable=tablaDeSimbolos.obtenerVariable(valor.valor);
                 return "stack["+variable.memoria+"]";
+            case "boolean":
+            case TIPO_VALOR.BOOLEANO:
+            case TIPO_OPERACION.MAYOR_QUE:
+            case TIPO_OPERACION.MENOR_QUE:
+            case TIPO_OPERACION.MAYOR_IGUAL:
+            case TIPO_OPERACION.MENOR_IGUAL:
+            case TIPO_OPERACION.IGUAL:
+            case TIPO_OPERACION.DIFERENTE:
+            case TIPO_OPERACION.AND : 
+            case TIPO_OPERACION.OR : 
+            case TIPO_OPERACION.NEGACION:
+                return c_procesarExpBooleano(valor,tablaDeSimbolos);
         }
     }
 }
+function c_procesarExpBooleano(expresion,tablaDeSimbolos){
+    switch(expresion.tipo){
+        case TIPO_VALOR.BOOLEANO:
+            if(expresion.valor=="true"){
+                return 1.0;
+            }else{
+                return 0.0;
+            }
+        case TIPO_OPERACION.MAYOR_QUE:
+        case TIPO_OPERACION.MENOR_QUE:
+        case TIPO_OPERACION.MAYOR_IGUAL:
+        case TIPO_OPERACION.MENOR_IGUAL:
+        case TIPO_OPERACION.IGUAL:
+        case TIPO_OPERACION.DIFERENTE:
+        case TIPO_OPERACION.OR:
+        case TIPO_OPERACION.AND : 
+
+            const valorIzq = c_procesarExpNumerica(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
+            const valorDer = c_procesarExpNumerica(expresion.operandoDer, tablaDeSimbolos);      // resolvemos el operando derecho.
+            codigo+=formato();
+            noTemporal++;
+            if (expresion.tipo === TIPO_OPERACION.AND) {codigo+="t"+noTemporal+"="+valorIzq+"&&"+valorDer+";\n";}
+            if (expresion.tipo === TIPO_OPERACION.OR)  {codigo+="t"+noTemporal+"="+valorIzq+"||"+valorDer+";\n";}
+            if (expresion.tipo === TIPO_OPERACION.MAYOR_QUE)    {codigo+="t"+noTemporal+"="+valorIzq+">"+valorDer+";\n";}
+            if (expresion.tipo === TIPO_OPERACION.MENOR_QUE)    {codigo+="t"+noTemporal+"="+valorIzq+"<"+valorDer+";\n";}
+            if (expresion.tipo === TIPO_OPERACION.MAYOR_IGUAL)  {codigo+="t"+noTemporal+"="+valorIzq+">="+valorDer+";\n";}
+            if (expresion.tipo === TIPO_OPERACION.MENOR_IGUAL)  {codigo+="t"+noTemporal+"="+valorIzq+"<="+valorDer+";\n";}
+            if (expresion.tipo === TIPO_OPERACION.IGUAL)        {codigo+="t"+noTemporal+"="+valorIzq+"=="+valorDer+";\n";}
+            if (expresion.tipo === TIPO_OPERACION.DIFERENTE)    {codigo+="t"+noTemporal+"="+valorIzq+"!="+valorDer+";\n";}
+            return "t"+noTemporal; 
+        case TIPO_OPERACION.NEGACION : 
+            let valor = c_procesarExpBooleano(expresion.operandoIzq, tablaDeSimbolos);     // resolvemos el operando
+            codigo+="t"+noTemporal+"=!"+valor+";\n";
+            return "t"+noTemporal; 
+    }
+}
+
 function c_procesarExpNumerica(expresion,tablaDeSimbolos){
     
     switch(expresion.tipo){
@@ -116,6 +166,7 @@ function c_asignarVariable(nombre,valor,tipo,tablaDeSimbolos){
         codigo+="stack["+variable.memoria+"]"+"="+valorAux+";\n";
     }
 }
+
 
 function c_procesarImprimir(contenido,tablaDeSimbolos){
     let tipo=contenido.tipo;
